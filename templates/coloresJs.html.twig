@@ -1,9 +1,12 @@
 <html>
-<head>
-    {# <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script> #}
-    <link rel="stylesheet" href="mystyle.css">
-    <title>Colores javascript</title>
-</head>
+    <head>
+        {# min de jquery, no está incuido. t_o_d_o está hecho en javascript #}
+        {# <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script> #}
+
+        {# ref: https://getbootstrap.com/docs/3.3/getting-started/ #}
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+              integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    </head>
 <body>
 <form id="form_colores_js">
 </form>
@@ -17,14 +20,10 @@
     </div>
     <div id="paletaColores" hidden="hidden">
         <div id="listaColores"></div>
-        <div id="antsig" data-paginaactual="0" data-totalpaginas="0">
-            <button id="Ant." onclick="funcAnt()">
-                Ant.
-            </button>
-            <div id="pg" data-pag="0"></div>
-            <button id="Sig."  onclick="funcSig()">
-                Sig.
-            </button>
+        <div id="antsig" class="justify-content-md-center" data-paginaactual="0" data-totalpaginas="0">
+            <a id="Ant" class="col-lg-1" href="#" style="horiz-align: left">Anterior</a>
+            <div id="pg" class="col-lg-10" data-pag="0"></div>
+            <a id="Sig"  class="col-lg-1" href="#" style="horiz-align: right">Siguiente</a>
         </div>
     </div>
 </body>
@@ -38,6 +37,7 @@
     var paletaColores = document.getElementById("paletaColores");
     var listaColores = document.getElementById("listaColores");
 
+    //peticion get a url que devuelve json
     var getJSON = function(url, callback) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
@@ -56,11 +56,16 @@
         xhr.send();
     };
 
-
-    function cargarColores() {
-        peticionCargaColores(urlColores);
-    };
-
+    //copia memoria de un texto
+    function copyToClipboard(text) {
+        const listener = function(ev) {
+            ev.preventDefault();
+            ev.clipboardData.setData('text/plain', text);
+        };
+        document.addEventListener('copy', listener);
+        document.execCommand('copy');
+        document.removeEventListener('copy', listener);
+    }
 
     function peticionCargaColores(url) {
         document.getElementById("cargar").disabled = true;
@@ -85,40 +90,59 @@
                 pagina.innerHTML = pgs+"/"+total;
 
                 for (var i = 0; i < dataLength; i++){
-                    txtElmnt = `<div id="colorId_${data.data[i].id.toString()}"
-                                    class="card"
-                                    style="background: ${data.data[i].color}; width: 18rem;"
-                                    data-name="${data.data[i].name}"
-                                    data-color="${data.data[i].color}"
-                                    data-year="${data.data[i].year}"
-                                    data-pantone="${data.data[i].pantone_value}">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${data.data[i].color}</h5>
-                                        <p class="card-text" bac>
-                                            ${data.data[i].name} (${data.data[i].pantone_value})
-                                        </p>
+                    txtElmnt = `<div class="col-md-6">
+                                    <div id="colorId_${data.data[i].id.toString()}"
+                                        class="card colores"
+                                        style="background: ${data.data[i].color};"
+                                        data-name="${data.data[i].name}"
+                                        data-color="${data.data[i].color}"
+                                        data-year="${data.data[i].year}"
+                                        data-pantone="${data.data[i].pantone_value}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${data.data[i].color}</h5>
+                                            <p class="card-text" bac>
+                                                ${data.data[i].name} (${data.data[i].pantone_value})
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>`;
                     listaColores.innerHTML += txtElmnt;
-
                 }
 
+                //enlazo evento copiar paletaColores
+                var blacks = document.getElementsByClassName('colores');
+
+                for(var i =0; i< blacks.length; i++){
+                    blacks[i].onclick = function(){
+                        var colorElem = this.getAttribute("data-color");
+                        copyToClipboard(colorElem);
+                        alert('copiado! ('+colorElem+')');
+
+                    }
+                }
             }
+
         });
     };
 
-    function funcAnt(){
+    function cargarColores() {
+        peticionCargaColores(urlColores);
+    };
+
+
+    document.getElementById("Sig").onclick = function(){
+        var totalPaginas = parseInt(paginacion.getAttribute("data-totalpaginas"));
+        if (totalPaginas != 'undefined' && totalPaginas != 'Nan') {
+            paginar(totalPaginas, 'next')
+        }
+    };
+
+    document.getElementById("Ant").onclick = function(){
         var totalPaginas = parseInt(paginacion.getAttribute("data-totalpaginas"));
         if (totalPaginas != 'undefined' && totalPaginas != 'Nan') {
             paginar(totalPaginas, 'prev')
         }
     };
-    function funcSig(){
-        var totalPaginas = parseInt(paginacion.getAttribute("data-totalpaginas"));
-        if (totalPaginas != 'undefined' && totalPaginas != 'Nan') {
-            paginar(totalPaginas, 'next')
-        }
-    }
 
     function paginar(paginas, sentido){
         pgActual = parseInt(paginacion.getAttribute("data-paginaactual"));
