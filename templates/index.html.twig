@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <title>Colores</title>
+    </head>
+    <body>
+    <form class="form-colores">
+    </form>
+    <div>
+        <input type="text" id="txtTexto">
+    </div>
+    <div>
+        <button id="enviarjs" onclick="enviarClickJs()">
+            Mostrar paleta colores (js)
+        </button>
+        <button id="enviarjq" onclick="enviarClickJq()">
+            Mostrar paleta colores (jq)
+        </button>
+    </div>
+    <div>
+    </div>
+    </body>
+</html>
+
+
+<script>
+    var btnEnviarJS,
+        btnEnviarJQ;
+
+    btnEnviarJS = document.getElementById('enviarjs');
+    btnEnviarJQ = document.getElementById('enviarjq');
+
+    function enviarClickJs(){
+        enviarClick('js');
+    }
+    function enviarClickJq(){
+        enviarClick('jq');
+    }
+    function enviarClick(tipo){
+        var url;
+        url = 'colores/'+tipo;
+        window.location.href = url;
+    }
+
+</script>

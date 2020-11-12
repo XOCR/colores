@@ -1,0 +1,47 @@
+<html>
+<head>
+    {% block javascripts %}
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    {% endblock %}
+    <title>Colores jquery</title>
+</head>
+<body>
+<div>
+    <button id="enviar">
+        Cargar colores
+    </button>
+    <button id="atras">
+        Atrás
+    </button>
+</div>
+<form id="form_colores_js">
+</form>
+</body>
+</html>
+
+<script>
+$(document).ready(function() {
+    $("#enviar").click(function() {
+        enviarClickJq();
+    });
+    $("#atras").click(function() {
+        window.history.back();
+    });
+
+    function enviarClickJq(){
+        $.ajax({
+            url: "https://reqres.in/api/colors",
+            type: "GET",
+            dataType: "json",
+            success: function(data){
+                console.log(data);
+            },
+            error: function(error){
+                console.log("Error:");
+                console.log(error);
+            }
+        });
+    };
+
+});
+</script>

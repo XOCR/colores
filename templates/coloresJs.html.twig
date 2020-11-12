@@ -1,0 +1,135 @@
+<html>
+<head>
+    {# <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script> #}
+    <link rel="stylesheet" href="mystyle.css">
+    <title>Colores javascript</title>
+</head>
+<body>
+<form id="form_colores_js">
+</form>
+    <div>
+        <button id="cargar" onclick="cargarColores()">
+            Cargar colores
+        </button>
+        <button id="atras" onclick="back()">
+            Atrás
+        </button>
+    </div>
+    <div id="paletaColores" hidden="hidden">
+        <div id="listaColores"></div>
+        <div id="antsig" data-paginaactual="0" data-totalpaginas="0">
+            <button id="Ant." onclick="funcAnt()">
+                Ant.
+            </button>
+            <div id="pg" data-pag="0"></div>
+            <button id="Sig."  onclick="funcSig()">
+                Sig.
+            </button>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+
+    var urlColores = 'https://reqres.in/api/colors';
+    var pagina = document.getElementById("pg");
+    var paginacion = document.getElementById("antsig");
+    var paletaColores = document.getElementById("paletaColores");
+    var listaColores = document.getElementById("listaColores");
+
+    var getJSON = function(url, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'json';
+
+        xhr.onload = function() {
+
+            var status = xhr.status;
+
+            if (status == 200) {
+                callback(null, xhr.response);
+            } else {
+                callback(status);
+            }
+        };
+        xhr.send();
+    };
+
+
+    function cargarColores() {
+        peticionCargaColores(urlColores);
+    };
+
+
+    function peticionCargaColores(url) {
+        document.getElementById("cargar").disabled = true;
+
+        getJSON(url, function (err, data) {
+            if (err != null) {
+                console.error(err);
+            } else {
+                console.log(data);
+                var txtElmnt,
+                    dataLength,
+                    pgs,
+                    total;
+                dataLength = data.data.length;
+                pgs = data.page;
+                total = data.total_pages;
+                paletaColores.removeAttribute("hidden");
+                paginacion.setAttribute("data-paginaactual",pgs);
+                paginacion.setAttribute("data-totalpaginas",total);
+                pagina.innerHTML = "";
+                listaColores.innerHTML = "";
+                pagina.innerHTML = pgs+"/"+total;
+
+                for (var i = 0; i < dataLength; i++){
+                    txtElmnt = `<div id="colorId_${data.data[i].id.toString()}"
+                                    class="card"
+                                    style="background: ${data.data[i].color}; width: 18rem;"
+                                    data-name="${data.data[i].name}"
+                                    data-color="${data.data[i].color}"
+                                    data-year="${data.data[i].year}"
+                                    data-pantone="${data.data[i].pantone_value}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${data.data[i].color}</h5>
+                                        <p class="card-text" bac>
+                                            ${data.data[i].name} (${data.data[i].pantone_value})
+                                        </p>
+                                    </div>
+                                </div>`;
+                    listaColores.innerHTML += txtElmnt;
+
+                }
+
+            }
+        });
+    };
+
+    function funcAnt(){
+        var totalPaginas = parseInt(paginacion.getAttribute("data-totalpaginas"));
+        if (totalPaginas != 'undefined' && totalPaginas != 'Nan') {
+            paginar(totalPaginas, 'prev')
+        }
+    };
+    function funcSig(){
+        var totalPaginas = parseInt(paginacion.getAttribute("data-totalpaginas"));
+        if (totalPaginas != 'undefined' && totalPaginas != 'Nan') {
+            paginar(totalPaginas, 'next')
+        }
+    }
+
+    function paginar(paginas, sentido){
+        pgActual = parseInt(paginacion.getAttribute("data-paginaactual"));
+        if (pgActual != 'undefined' && pgActual != 'Nan' && sentido == 'next' && paginas > pgActual){
+            peticionCargaColores(urlColores+"?page="+(parseInt(pgActual)+1));
+        }else if (pgActual != 'undefined' && pgActual != 'Nan' && sentido == 'prev' && pgActual > 1){
+            peticionCargaColores(urlColores+"?page="+(parseInt(pgActual)-1));
+        }
+    };
+
+    function back(){
+        window.history.back();
+    };
+</script>
